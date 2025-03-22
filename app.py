@@ -2,10 +2,10 @@ import streamlit as st
 import google.generativeai as genai
 import json
 import os
+import requests
 
 # Initialize API
-Authorization=st.secret["API_KEY"]
-genai.configure(api_key=Authorization)
+genai.configure(api_key=st.secret["API_KEY"])
 
 # Load model
 model = genai.GenerativeModel("gemini-1.5-flash")
