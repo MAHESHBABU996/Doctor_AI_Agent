@@ -5,7 +5,8 @@ import os
 import requests
 
 # Initialize API
-genai.configure(api_key=st.secret["API_KEY"])
+Authorization=st.secret["API_KEY"]
+genai.configure(api_key=Authorization)
 
 # Load model
 model = genai.GenerativeModel("gemini-1.5-flash")
