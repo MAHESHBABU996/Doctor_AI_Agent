@@ -5,7 +5,7 @@ import os
 import requests
 
 # Initialize API
-Authorization: st.secret["API_KEY"]
+Authorization=st.secrets["API_KEY"]
 genai.configure(api_key=Authorization)
 
 # Load model
