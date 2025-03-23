@@ -27,7 +27,7 @@ def analyze_severity(symptoms):
     return "unknown"
 
 # Streamlit UI
-st.title("👨‍⚕️ AI Doctor Chatbot")
+st.title("👨‍⚕️ Doctor AI Agent")
 st.write("Type your symptoms below to get medical guidance.")
 
 user_input = st.text_area("Enter your symptoms:")
