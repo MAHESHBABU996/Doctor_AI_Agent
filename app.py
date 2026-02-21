@@ -2,20 +2,12 @@ import streamlit as st
 from google import genai
 from google.genai.types import GenerateContentConfig
 
-# ---------------------------
-# Configure API Key
-# ---------------------------
+# Configure API
 client = genai.Client(api_key=st.secrets["API_KEY"])
 
-# ---------------------------
-# Streamlit Session Storage
-# ---------------------------
 if "user_health_data" not in st.session_state:
     st.session_state.user_health_data = {}
 
-# ---------------------------
-# Severity Analyzer
-# ---------------------------
 def analyze_severity(symptoms):
     severity_keywords = {
         "mild": ["slight", "mild", "occasional", "light"],
@@ -27,9 +19,6 @@ def analyze_severity(symptoms):
             return level
     return "unknown"
 
-# ---------------------------
-# UI
-# ---------------------------
 st.title("👨‍⚕️ Doctor AI Agent")
 st.write("Type your symptoms below to get medical guidance.")
 
@@ -40,24 +29,19 @@ if st.button("Get Diagnosis") and user_input:
     severity = analyze_severity(user_input)
 
     prompt = f"""
-    You are an AI Medical Doctor specializing in Modern Medicine, Ayurveda, Yoga, and Alternative Healing.
+    You are an AI Medical Doctor.
 
-    User's Symptoms: {user_input}
-    Severity Level: {severity.upper()}
+    Symptoms: {user_input}
+    Severity: {severity}
 
     Provide:
     1. Possible Causes
-    2. Treatment (Modern + Ayurveda)
-    3. Medications (General Only)
-    4. Natural Remedies
-    5. Alternative Therapies
-    6. Diet Recommendations
-    7. Preventive Measures
-    8. Health Risk Level
-    9. Emergency Alert (if severe)
-    10. Next Steps
-
-    Keep it clear and professional.
+    2. Treatment
+    3. Medications (general only)
+    4. Natural remedies
+    5. Diet advice
+    6. Risk level
+    7. When to see a doctor
     """
 
     try:
@@ -75,17 +59,5 @@ if st.button("Get Diagnosis") and user_input:
     except Exception as e:
         diagnosis = f"⚠️ Error: {str(e)}"
 
-    # Store history
-    st.session_state.user_health_data[user_input] = {
-        "severity": severity,
-        "response": diagnosis
-    }
-
     st.subheader("👨‍⚕️ Doctor's Response:")
     st.write(diagnosis)
-
-    # Smart Reminders
-    if "hydration" in user_input.lower():
-        st.info("💧 Reminder: Drink 2-3 liters of water daily.")
-    if "sleep" in user_input.lower():
-        st.info("🛌 Reminder: Aim for 7-9 hours of sleep.")
