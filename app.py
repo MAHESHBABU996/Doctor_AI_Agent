@@ -9,9 +9,8 @@ Authorization=st.secrets["API_KEY"]
 genai.configure(api_key=Authorization)
 
 # Load model
-model = genai.GenerativeModel("gemini-1.5-pro-latest")
-
-# Health Report Storage
+model = genai.GenerativeModel("gemini-1.5-flash")
+  
 if "user_health_data" not in st.session_state:
     st.session_state.user_health_data = {}
 
@@ -72,6 +71,3 @@ if st.button("Get Diagnosis") and user_input:
         st.info("💧 Reminder: Drink 2-3 liters of water daily for proper hydration!")
     elif "sleep" in user_input.lower():
         st.info("🛌 Reminder: Aim for 7-9 hours of sleep for good health!")
-
-
-
