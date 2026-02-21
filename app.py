@@ -1,19 +1,21 @@
 import streamlit as st
-import google.generativeai as genai
-import json
-import os
-import requests
+from google import genai
+from google.genai.types import GenerateContentConfig
 
-# Initialize API
-Authorization=st.secrets["API_KEY"]
-genai.configure(api_key=Authorization)
+# ---------------------------
+# Configure API Key
+# ---------------------------
+client = genai.Client(api_key=st.secrets["API_KEY"])
 
-# Load model
-model = genai.GenerativeModel("gemini-1.5-flash")
-  
+# ---------------------------
+# Streamlit Session Storage
+# ---------------------------
 if "user_health_data" not in st.session_state:
     st.session_state.user_health_data = {}
 
+# ---------------------------
+# Severity Analyzer
+# ---------------------------
 def analyze_severity(symptoms):
     severity_keywords = {
         "mild": ["slight", "mild", "occasional", "light"],
@@ -25,49 +27,65 @@ def analyze_severity(symptoms):
             return level
     return "unknown"
 
-# Streamlit UI
+# ---------------------------
+# UI
+# ---------------------------
 st.title("👨‍⚕️ Doctor AI Agent")
 st.write("Type your symptoms below to get medical guidance.")
 
 user_input = st.text_area("Enter your symptoms:")
 
 if st.button("Get Diagnosis") and user_input:
+
     severity = analyze_severity(user_input)
-    
+
     prompt = f"""
-    You are an AI Medical Doctor specializing in **Modern Medicine, Ayurveda, Yoga, and Alternative Healing**.
+    You are an AI Medical Doctor specializing in Modern Medicine, Ayurveda, Yoga, and Alternative Healing.
 
-    **User's Symptoms:** "{user_input}"
-    **Severity Level:** {severity.upper()}
+    User's Symptoms: {user_input}
+    Severity Level: {severity.upper()}
 
-    Provide a structured response including:
-    1️⃣ **Possible Causes**
-    2️⃣ **Treatment (Modern + Ayurveda + Alternative)**
-    3️⃣ **Medications (General Guidance Only)**
-    4️⃣ **Natural Remedies (Ayurveda, Homeopathy, Herbal)**
-    5️⃣ **Alternative Therapies (Yoga, Meditation, Acupressure, Naturopathy)**
-    6️⃣ **Diet & Fitness Recommendations**
-    7️⃣ **Preventive Measures**
-    8️⃣ **Health Risk Level (High/Medium/Low)**
-    9️⃣ **Emergency Alert (if symptoms are severe, suggest emergency contacts)**
-    🔟 **Health Tracking & Next Steps**
+    Provide:
+    1. Possible Causes
+    2. Treatment (Modern + Ayurveda)
+    3. Medications (General Only)
+    4. Natural Remedies
+    5. Alternative Therapies
+    6. Diet Recommendations
+    7. Preventive Measures
+    8. Health Risk Level
+    9. Emergency Alert (if severe)
+    10. Next Steps
 
-    Ensure the response is **clear, professional, and easy to understand**.
+    Keep it clear and professional.
     """
-    
-    response = model.generate_content(prompt)
-    diagnosis = response.text
-    
+
+    try:
+        response = client.models.generate_content(
+            model="gemini-1.5-flash",
+            contents=prompt,
+            config=GenerateContentConfig(
+                temperature=0.7,
+                max_output_tokens=1024,
+            ),
+        )
+
+        diagnosis = response.text
+
+    except Exception as e:
+        diagnosis = f"⚠️ Error: {str(e)}"
+
+    # Store history
     st.session_state.user_health_data[user_input] = {
         "severity": severity,
         "response": diagnosis
     }
-    
+
     st.subheader("👨‍⚕️ Doctor's Response:")
     st.write(diagnosis)
-    
+
     # Smart Reminders
     if "hydration" in user_input.lower():
-        st.info("💧 Reminder: Drink 2-3 liters of water daily for proper hydration!")
-    elif "sleep" in user_input.lower():
-        st.info("🛌 Reminder: Aim for 7-9 hours of sleep for good health!")
+        st.info("💧 Reminder: Drink 2-3 liters of water daily.")
+    if "sleep" in user_input.lower():
+        st.info("🛌 Reminder: Aim for 7-9 hours of sleep.")
